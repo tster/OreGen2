@@ -1,5 +1,5 @@
 #OreGen2 Config File
-#The format of this file is "<Material name>: <# of draws>"
+#The format of this file is "<Material name>: <no. of draws>"
 #Probability of material generation = material's no. of draws / total no. of draws
 STONE: 60
 COAL_ORE: 10

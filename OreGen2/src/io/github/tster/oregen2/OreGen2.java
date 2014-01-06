@@ -20,6 +20,8 @@ public final class OreGen2 extends JavaPlugin implements Listener {
 		Integer drawNumber;
 		double totalDraws = 0;
 		Integer currentDraw = 0;
+		double doubleFromString;
+		Map.Entry<String, Object> entry;
 		
 		public void onEnable(){
 			getServer().getPluginManager().registerEvents(this, this);
@@ -66,17 +68,35 @@ public final class OreGen2 extends JavaPlugin implements Listener {
 			// Long method to find the highest number of decimal places in the config file
 			// This value will be used to convert decimal chances into draws
 			for (Object value : configMap.values()) {
-				totalDraws = totalDraws + Double.parseDouble(value.toString()) * Math.pow(10,maxDecimalPlaces);
+				try {
+					doubleFromString = Double.parseDouble(value.toString());
+				} catch (NumberFormatException e) {
+					getLogger().info("Invalid config.yml, please review it.");
+				}
+				totalDraws = totalDraws + doubleFromString * Math.pow(10,maxDecimalPlaces);
 			}
 			// Finds the total number of draws - in doing so converting decimal chances to draws
 			drawNumber = rand.nextInt((int) totalDraws) + 1;
 			// Generates a random number between 1 and the total number of draws
 			for (Map.Entry<String, Object> entry : configMap.entrySet()) {
 				// For each key in config
-				if (drawNumber <= (Double.parseDouble(entry.getValue().toString()) * Math.pow(10, maxDecimalPlaces)) + currentDraw) {
+				try {
+					// Try to get the chance as a double
+					doubleFromString = Double.parseDouble(entry.getValue().toString());
+				} catch (NumberFormatException e) {
+					// Catch exceptions in conversion and respond with an error message
+					getLogger().info("Invalid number'"+entry.getValue().toString()+"'. Please review config.yml!");
+				}
+				if (drawNumber <= doubleFromString * Math.pow(10, maxDecimalPlaces) + currentDraw) {
 					// If the random number is less than or equal to the key's value + the current draw
 					if (blockMaterial == null) {
-						blockMaterial = Material.getMaterial(entry.getKey());
+						try {
+							// Try converting the key to a material
+							blockMaterial = Material.getMaterial(entry.getKey());
+						} catch (Exception e) {
+							// Catch any exceptions and respond with an error message
+							getLogger().info("Invalid material name '"+entry.getKey()+"'. Please review config.yml!");
+						}
 					}
 
 					// Set the output block to the material associated with the key name
